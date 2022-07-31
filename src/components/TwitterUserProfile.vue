@@ -6,19 +6,46 @@
     >
       <v-row>
         <v-col cols="9">
-          <v-text-field v-model="searchValue" label="User lookup"></v-text-field>
+          <v-text-field
+            v-model="searchValue"
+            v-if="!error"
+            variant="outlined"
+            clearable
+            clear-icon="mdi:mdi-cancel"
+          ></v-text-field>
+          <v-text-field
+            v-model="searchValue"
+            v-else
+            variant="outlined"
+            clearable
+            error
+            hint="No user found"
+            clear-icon="mdi:mdi-cancel"
+          ></v-text-field>
+
         </v-col>
-        <v-col>
+        <v-col> 
           <v-btn
-            class="red--text ma-2"
-            :class="gender"
-            icon="mdi-account-search"
+            v-if="!waitingOnUser"
+            class="profile-border"
+            icon="mdi:mdi-account-search"
             v-on:click="twitterUserLookup()"
+            @click="waitingOnUser = !waitingOnUser"
           ></v-btn>
+      
+          <v-btn
+            v-else
+            class="profile-border"
+            elevation="2"
+            icon="fas fa-circle-notch fa-spin"
+            rounded
+            style="cursor: auto;"
+          ></v-btn>
+         
         </v-col>
       </v-row>
     </v-container>
-    <img :class="gender" :height=125 :width=125 :src="picture" :alt="`${fullName}`">
+    <img class="profile-border" :height=125 :width=125 :src="picture" :alt="`${fullName}`">
     <h1>{{fullName}}</h1>
     <h3>Username: {{username}}</h3>
     <h3>Created on: {{creation_date}}</h3>
@@ -31,6 +58,8 @@ export default {
   name: 'TwitterUserProfile',
   data() {
     return {
+        error: false,
+        waitingOnUser: false,
         fullName: "Alvaro Lamadrid",
         gender: "male",
         picture: "https://pbs.twimg.com/profile_images/1529881217964834819/fevy6a_v.jpg",
@@ -51,6 +80,7 @@ export default {
     },
 
     async twitterUserLookup() {
+      this.error = false 
       let userResult;
       let result;
       
@@ -60,6 +90,8 @@ export default {
 
       if(userResult.errors){
         console.log("No username found")
+        this.waitingOnUser = !this.waitingOnUser;
+        this.error = !this.error;
         return
       }
 
@@ -69,10 +101,11 @@ export default {
       await fetch(`/.netlify/functions/tw-user-fetch?username=${this.username}`)
         .then(response => response.json())
         .then(data => (result = data.data));
-        
+
       this.fullName = result.name
       this.picture = result.profile_image_url.replace("_normal", "")
 
+      this.waitingOnUser = !this.waitingOnUser;
     }
   }
 }
@@ -103,15 +136,13 @@ img {
   margin-bottom: 1rem;
 }
 
-.male {
+.profile-border {
   color: white;
   border-color: steelblue;
   background-color: steelblue;
 }
 
-.female {
-  border-color: pink;
-  background-color: pink;
-  color: #333;
+.v-btn__overlay {
+  opacity: 0 !important;
 }
 </style>
