@@ -8,14 +8,14 @@
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
 import TwitterUserProfileVue from './components/TwitterUserProfile.vue'
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
+    // HelloWorld,
     TwitterUserProfileVue
   },
 

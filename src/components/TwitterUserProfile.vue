@@ -1,9 +1,27 @@
 <template>
   <div id="app">
-    <img :class="gender" :src="picture" :alt="`${firstName} ${lastName}`">
-    <h1>{{firstName}} {{lastName}}</h1>
-    <h3>Email: {{email}}</h3>
-    <v-btn v-on:click="twitterFetch()" :class="gender">Get Random User</v-btn>
+    <v-container
+      id="input-usage"
+      fluid
+    >
+      <v-row>
+        <v-col cols="9">
+          <v-text-field v-model="searchValue" label="User lookup"></v-text-field>
+        </v-col>
+        <v-col>
+          <v-btn
+            class="red--text ma-2"
+            :class="gender"
+            icon="mdi-account-search"
+            v-on:click="twitterUserLookup()"
+          ></v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
+    <img :class="gender" :height=125 :width=125 :src="picture" :alt="`${fullName}`">
+    <h1>{{fullName}}</h1>
+    <h3>Username: {{username}}</h3>
+    <h3>Created on: {{creation_date}}</h3>
   </div>
 </template>
 
@@ -11,79 +29,50 @@
 
 export default {
   name: 'TwitterUserProfile',
-  // props: {
-  //   msg: String
-  // },
   data() {
     return {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@gmail.com',
-        gender: 'male',
-        picture: 'https://randomuser.me/api/portraits/men/10.jpg'
+        fullName: "Alvaro Lamadrid",
+        gender: "male",
+        picture: "https://pbs.twimg.com/profile_images/1529881217964834819/fevy6a_v.jpg",
+        searchValue: "",
+        username: "aglamadrid19",
+        creation_date: "Sun Apr 10 2022 12:02:27 GMT-0400 (Eastern Daylight Time)"
     }
   },
   methods: {
-    async getUser() {
-      // const twUserRes = "https://miau.com"
-      const res = await fetch('https://randomuser.me/api')
-      const {results} = await res.json()
-
-      console.log(results)
-      this.firstName = results[0].name.first,
-      this.lastName = results[0].name.last,
-      this.email = results[0].email,
-      this.gender = results[0].gender,
-      this.picture = results[0].picture.large
-    },
-    
     async twitterFetch() {
-      const token = process.env.BEARER_TOKEN;
+      let result;
+      
+      await fetch("/.netlify/functions/tw-user-fetch")
+        .then(response => response.json())
+        .then(data => (result = data.data));
 
-      const endpointURL = "https://api.twitter.com/2/users/by?usernames="
+      this.picture = result.profile_image_url.replace("_normal", "")
+    },
 
-      async function getRequest() {
+    async twitterUserLookup() {
+      let userResult;
+      let result;
+      
+      await fetch(`/.netlify/functions/tw-user-lookup?username=${this.searchValue}`)
+        .then(response => response.json())
+        .then(data => (userResult = data));
 
-        // These are the parameters for the API request
-        // specify User names to fetch, and any additional fields that are required
-        // by default, only the User ID, name and user name are returned
-        const params = {
-            usernames: "TwitterDev,TwitterAPI", // Edit usernames to look up
-            "user.fields": "created_at,description", // Edit optional query parameters here
-            "expansions": "pinned_tweet_id"
-        }
-
-        // this is the HTTP header that adds bearer token authentication
-        // const res = await needle('get', endpointURL, params, {
-        //     headers: {
-        //         "User-Agent": "v2UserLookupJS",
-        //         "authorization": `Bearer ${token}`
-        //     }
-        // })
-        const response = await fetch(`${endpointURL}${params.usernames}`, {
-          headers: new Headers({
-            'Authorization': token
-          })
-        });
-
-        console.log(response)
-        // if (res.body) {
-        //     return res.body;
-        // } else {
-        //     throw new Error('Unsuccessful request')
-        // }
+      if(userResult.errors){
+        console.log("No username found")
+        return
       }
 
-      try {
-        // Make request
-        const response = await getRequest();
-        console.dir(response, {
-            depth: null
-        });
+      this.username = userResult.data[0].username;
+      this.creation_date = new Date(userResult.data[0].created_at);
 
-      } catch (e) {
-          console.log(e);
-      }
+      await fetch(`/.netlify/functions/tw-user-fetch?username=${this.username}`)
+        .then(response => response.json())
+        .then(data => (result = data.data));
+        
+      this.fullName = result.name
+      this.picture = result.profile_image_url.replace("_normal", "")
+
     }
   }
 }
@@ -115,6 +104,7 @@ img {
 }
 
 .male {
+  color: white;
   border-color: steelblue;
   background-color: steelblue;
 }
