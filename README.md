@@ -1,24 +1,13 @@
-# hello-world
+# Basic Vue frontend app coupled with Netlify Serverless Functions to fecth Twitter data
 
-## Project setup
-```
-yarn install
-```
+This project is a demo of a basic Vue and Vuetify application that connects to Netlify Serverless Functions to perform queries on Twitter.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+Current features:
+- Search functionality for Twitter username
+- Render username, account creation date, profle picture and more.
+- UI changes on user not found scenario or disabled
 
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Future:
+- Display engamenet of user latest post
+- Account analitycs
+- Schedule post
