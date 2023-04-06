@@ -1,7 +1,5 @@
 # Basic Vue frontend app coupled with Netlify Serverless Functions to fecth Twitter data
 
-[Live Site](https://dulcet-cuchufli-1e20c8.netlify.app/)
-
 This project is a demo of a basic Vue and Vuetify application that connects to Netlify Serverless Functions to perform queries on Twitter.
 
 Current features:
